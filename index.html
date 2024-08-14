@@ -1,0 +1,283 @@
+<html><head><base href="https://centralbicentenario.org/calendario-turnos/%20tenemos%20que%20modificar%20el%20algoritmo%20del%20regimen,%20porque%20cuando%20la%20guardia%20est%C3%A1%20en%20el%20turno%20de%2006%20a%2018%20son%204%20d%C3%ADas%20en%20vez%20de%203%20como%20lo%20est%C3%A1%20haciendo%20ahora">
+<title>Calendario de Turnos - Central Bicentenario</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body {
+    font-family: 'Roboto', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    max-width: 1920px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  #calendar {
+    flex: 1;
+    background-color: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    padding: 20px;
+    height: calc(100vh - 120px);
+    overflow: auto;
+  }
+  .fc-header-toolbar {
+    margin-bottom: 15px !important;
+    padding: 0 15px;
+  }
+  .fc-day-grid-event {
+    margin: 1px 0 !important;
+    padding: 2px 4px !important;
+    font-size: 12px !important;
+    line-height: 1.3 !important;
+    border: none !important;
+  }
+  .guard-A { background-color: #87CEEB !important; border-color: #87CEEB !important; color: #000000 !important; }
+  .guard-B { background-color: #808080 !important; border-color: #808080 !important; color: #FFFFFF !important; }
+  .guard-C { background-color: #FFD700 !important; border-color: #FFD700 !important; color: #000000 !important; }
+  .guard-D { background-color: #008000 !important; border-color: #008000 !important; color: #FFFFFF !important; }
+  .guard-E { background-color: #FF8C00 !important; border-color: #FF8C00 !important; color: #FFFFFF !important; }
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  .toggle-buttons {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .toggle-button, .show-all-button {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    margin: 4px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s;
+    color: white;
+    font-size: 14px;
+    text-transform: uppercase;
+  }
+  .toggle-button.active {
+    opacity: 1;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  .toggle-button.inactive {
+    opacity: 0.6;
+  }
+  .toggle-button:hover, .show-all-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+  .show-all-button {
+    background-color: #4CAF50;
+    font-size: 14px;
+  }
+  .fc-day-grid-container {
+    height: auto !important;
+  }
+  .fc-day-number {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+  }
+  .fc-day-header {
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: #666;
+    padding: 10px 0 !important;
+  }
+  .fc-today {
+    background-color: #e8f5e9 !important;
+  }
+  .fc-content {
+    white-space: normal !important;
+  }
+  .checkbox {
+    width: 18px;
+    height: 18px;
+    border: 2px solid white;
+    border-radius: 3px;
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .checkbox::after {
+    content: '\2714';
+    color: white;
+    font-size: 14px;
+    display: none;
+  }
+  .toggle-button.active .checkbox::after {
+    display: block;
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fullcalendar/core@4.4.0/main.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@4.4.0/main.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@4.4.0/main.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@4.4.0/main.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@4.4.0/locales/es.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="top-bar">
+      <div class="toggle-buttons">
+        <button class="toggle-button guard-A active" onclick="toggleGuard('A')">
+          <div class="checkbox"></div>
+          Guardia A
+        </button>
+        <button class="toggle-button guard-B active" onclick="toggleGuard('B')">
+          <div class="checkbox"></div>
+          Guardia B
+        </button>
+        <button class="toggle-button guard-C active" onclick="toggleGuard('C')">
+          <div class="checkbox"></div>
+          Guardia C
+        </button>
+        <button class="toggle-button guard-D active" onclick="toggleGuard('D')">
+          <div class="checkbox"></div>
+          Guardia D
+        </button>
+        <button class="toggle-button guard-E active" onclick="toggleGuard('E')">
+          <div class="checkbox"></div>
+          Guardia E
+        </button>
+        <button class="show-all-button" onclick="showAllGuards()">Mostrar todas</button>
+      </div>
+    </div>
+
+    <div id="calendar"></div>
+  </div>
+
+  <script>
+    let calendar;
+    let activeGuards = ['A', 'B', 'C', 'D', 'E'];
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const calendarEl = document.getElementById('calendar');
+      calendar = new FullCalendar.Calendar(calendarEl, {
+        plugins: [ 'dayGrid' ],
+        header: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,dayGridWeek'
+        },
+        locale: 'es',
+        events: generateEvents(),
+        aspectRatio: 1.8,
+        contentHeight: 'auto',
+        fixedWeekCount: false,
+        eventOrder: 'order'
+      });
+      calendar.render();
+    });
+
+    function updateCalendar() {
+      calendar.removeAllEvents();
+      calendar.addEventSource(generateEvents());
+    }
+
+    function generateEvents() {
+      const events = [];
+      const guards = ['A', 'B', 'C', 'D', 'E'];
+      const startDates = {
+        'A': '2024-01-15',
+        'B': '2024-01-03',
+        'C': '2024-01-09',
+        'D': '2024-01-06',
+        'E': '2024-01-12'
+      };
+      
+      guards.forEach(guard => {
+        if (activeGuards.includes(guard)) {
+          let currentDate = moment(startDates[guard]);
+          for (let i = 0; i < 365; i++) {
+            // Turno de 18 a 06 por 3 días
+            for (let j = 0; j < 3; j++) {
+              events.push({
+                title: `Guardia ${guard} (18 a 24)`,
+                start: currentDate.format('YYYY-MM-DD'),
+                allDay: true,
+                className: `guard-${guard}`,
+                order: 3
+              });
+              events.push({
+                title: `Guardia ${guard} (00 a 06)`,
+                start: currentDate.add(1, 'days').format('YYYY-MM-DD'),
+                allDay: true,
+                className: `guard-${guard}`,
+                order: 1
+              });
+            }
+            
+            // 6 días de franco
+            currentDate.add(6, 'days');
+            
+            // Turno de 06 a 18 por 4 días (modificado de 3 a 4)
+            for (let j = 0; j < 4; j++) {
+              events.push({
+                title: `Guardia ${guard} (06 a 18)`,
+                start: currentDate.format('YYYY-MM-DD'),
+                allDay: true,
+                className: `guard-${guard}`,
+                order: 2
+              });
+              currentDate.add(1, 'days');
+            }
+            
+            // 2 días de franco
+            currentDate.add(2, 'days');
+          }
+        }
+      });
+      
+      return events;
+    }
+
+    function toggleGuard(guard) {
+      const button = document.querySelector(`.toggle-button.guard-${guard}`);
+      if (activeGuards.includes(guard)) {
+        activeGuards = activeGuards.filter(g => g !== guard);
+        button.classList.remove('active');
+        button.classList.add('inactive');
+      } else {
+        activeGuards.push(guard);
+        button.classList.remove('inactive');
+        button.classList.add('active');
+      }
+      updateCalendar();
+    }
+
+    function showAllGuards() {
+      activeGuards = ['A', 'B', 'C', 'D', 'E'];
+      document.querySelectorAll('.toggle-button').forEach(button => {
+        button.classList.remove('inactive');
+        button.classList.add('active');
+      });
+      updateCalendar();
+    }
+  </script>
+</body>
+</html>
